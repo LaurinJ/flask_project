@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcame</title>
+    <link rel="stylesheet" type="text/css" href={{url_for("static", filename="css/main.css")}}>
+</head>
+<body>
+<header>
+    <h1>Welcome people</h1>
+</header>
+
+<nav>
+    <ul class=nav>
+        <li><a href="#">Home</a> </li>
+        <li><a href="#">Blog</a> </li>
+        <li><a href="#">Info</a> </li>
+    </ul>
+</nav>
+
+<main>
+    <blockquote>
+        {{ text }}
+    </blockquote>
+</main>
+
+<footer>
+    <p>
+        (c) 2019 Welcame broo
+    </p>
+</footer>
+</body>
+</html>
