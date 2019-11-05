@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcame</title>
+    <title>{% block title %} {% endblock %} </title>
     <link rel="stylesheet" type="text/css" href={{url_for("static", filename="css/main.css")}}>
 </head>
 <body>
@@ -12,16 +12,15 @@
 
 <nav>
     <ul class=nav>
-        <li><a href="#">Home</a> </li>
-        <li><a href="#">Blog</a> </li>
-        <li><a href="#">Info</a> </li>
+        <li><a href="{{url_for('index')}}">Home</a> </li>
+        <li><a href="{{url_for('view_blog')}}">Blog</a> </li>
+        <li><a href="{{url_for('view_info')}}">Info</a> </li>
+        <li><a href="{{url_for('view_admin')}}">Admin</a> </li>
     </ul>
 </nav>
 
 <main>
-    <blockquote>
-        {{ text }}
-    </blockquote>
+    {% block main %}{% endblock %}
 </main>
 
 <footer>
