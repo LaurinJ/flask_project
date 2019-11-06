@@ -1,0 +1,18 @@
+{% extends "_main.html" %}
+
+{% block title %} Blogy {% endblock %}
+
+{% block main %}
+    {% if articles %}
+        <ul>
+            {% for id, article in articles %}
+            <li>
+                <a href="{{ url_for('view_blog', art_id=id) }}"><h2>{{ article.title }}</h2></a>
+                <p>{{ article.content | truncate(100) }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No articles</p>
+    {% endif %}
+{% endblock %}

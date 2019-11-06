@@ -1,5 +1,8 @@
 {% extends "_main.html" %}
 
-{% block title %} Blog {% endblock %}
+{% block title %} Blog {{ article.title }} {% endblock %}
 
-{% block main %} Nejnovejsi clankz {% endblock %}
+{% block main %}
+    <h2>{{ article.title }}</h2>
+    <p>{{ article.content }}</p>
+{% endblock %}
