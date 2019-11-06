@@ -4,5 +4,15 @@
         <li><a href="{{url_for('view_blogs')}}">Blogs</a> </li>
         <li><a href="{{url_for('view_info')}}">Info</a> </li>
         <li><a href="{{url_for('view_admin')}}">Admin</a> </li>
+        {% if "logged" not in session %}
+            <li><a href="{{url_for('view_login')}}">Login</a> </li>
+        {% endif %}
+        {% if "logged" in session %}
+            <li>
+                <form action="{{url_for('logout_user')}}" method="post">
+                    <input type="submit" value="logout">
+                </form>
+            </li>
+        {% endif %}
     </ul>
 </nav>
