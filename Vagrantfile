@@ -21,6 +21,9 @@ Vagrant.configure("2") do |config|
   
   #public network => bridged
   config.vm.network "public_network"
+  
+  # install configure software
+  config.vm.provision :shell, :path => "bootstrap.sh"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs

@@ -5,6 +5,7 @@ from flask import request
 from flask import redirect
 from flask import session
 from flask import g
+from flask import flash
 
 import os
 import sqlite3
@@ -33,6 +34,7 @@ def add_blogs():
     db.execute("insert into articles (title, content) values (?, ?)",
                [request.form.get("title"), request.form.get("content")])
     db.commit()
+    flash("article was saved", "alert-successful")
     return redirect(url_for("view_blogs"))
 
 @flask_app.route("/info/")
@@ -42,6 +44,7 @@ def view_info():
 @flask_app.route("/admin/")
 def view_admin():
     if "logged" not in session:
+        flash("you must be logged in", "alert-danger")
         return redirect(url_for("view_login"))
     return render_template('view_admin.html')
 
@@ -65,8 +68,10 @@ def login_user():
         password = request.form["password"]
         if username == flask_app.config["USERNAME"] and password == flask_app.config["PASSWORD"]:
             session["logged"] = True
+            flash("login successful", "alert-successful")
             return redirect(url_for("view_admin"))
         else:
+            flash("login fail", "alert-fail")
             return redirect(url_for("view_login"))
 
 @flask_app.route("/logout/", methods=["POST"])

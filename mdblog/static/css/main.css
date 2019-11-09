@@ -37,3 +37,32 @@ footer {
 main {
     text-align: center;
 }
+
+.flashes {
+    padding: 0;
+    position: sticky;
+    top: 0;
+    width: 100%;
+}
+
+.flashes li {
+    list-style: none;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.flashes .alert-danger {
+    background: red;
+}
+
+.flashes .alert-successful {
+    background: green;
+}
+
+.flashes .alert-fail {
+    background: plum;
+}
+
