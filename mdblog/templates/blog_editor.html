@@ -1,0 +1,22 @@
+{% extends "_main.html" %}
+
+{% block title %} Editor {% endblock %}
+
+{% block main %}
+        {% if article %}
+            <form action="{{ url_for('view_edit', art_id=article.id) }}" method="post">
+        {% else %}
+            <form action="{{ url_for('add_blogs') }}" method="post">
+        {% endif %}
+         {{ form.csrf_token }}
+        <p>
+            {{ form.title.label }}
+            {{ form.title() }}
+        </p>
+        <p>
+            {{ form.content.label }}
+            {{ form.content() }}
+        </p>
+        <input type="submit" value="Save">
+    </form>
+{% endblock %}

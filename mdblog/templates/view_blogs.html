@@ -3,6 +3,9 @@
 {% block title %} Blogy {% endblock %}
 
 {% block main %}
+    {% if "logged" in session %}
+        <a href="{{ url_for('view_add_blogs') }}" class="button">New</a>
+    {% endif %}
     {% if articles %}
         <ul>
             {% for article in articles %}
