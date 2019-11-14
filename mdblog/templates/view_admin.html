@@ -2,4 +2,8 @@
 
 {% block title %} Admin {% endblock %}
 
-{% block main %} Prosim prihlas se {% endblock %}
+{% block main %} 
+{% if "logged" in session %}
+    <a href="{{ url_for('view_change_password') }}">Change password</a>
+{% endif %}
+{% endblock %}

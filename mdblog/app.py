@@ -12,8 +12,12 @@ from wtforms import PasswordField
 from wtforms.validators import InputRequired
 from wtforms import TextAreaField
 
+from .models import db
+from .models import Article
+from .models import User
+
 import os
-import sqlite3
+
 
 flask_app = Flask(__name__)
 
@@ -21,6 +25,8 @@ flask_app.config.from_pyfile("/vagrant/configs/default.py")
 
 if "MDBLOG_CONFIG" in os.environ:
     flask_app.config.from_envvar("MDBLOG_CONFIG")
+
+db.init_app(flask_app)
 
 # Forms
 
@@ -30,7 +36,11 @@ class LoginForm(FlaskForm):
 
 class ArticleForm(FlaskForm):
     title = StringField("Title", validators=[InputRequired()])
-    content = TextAreaField("Content")
+    content = TextAreaField("Content", validators=[InputRequired()])
+
+class ChangePasswordForm(FlaskForm):
+    old_password = PasswordField("Old_password", validators=[InputRequired()])
+    new_password = PasswordField("New_password", validators=[InputRequired()])
 
 # Route
 
@@ -40,21 +50,27 @@ def index():
 
 @flask_app.route("/blogs/", methods=["GET"])
 def view_blogs():
-    db = get_db()
-    cur = db.execute("select * from articles order by id desc ")
-    articles = cur.fetchall()
+    articles = Article.query.order_by(Article.id.desc())
     return render_template('view_blogs.html', articles=articles)
 
 @flask_app.route("/blogs/", methods=["POST"])
 def add_blogs():
     if "logged" not in session:
         return redirect(url_for("view_login"))
-    db = get_db()
-    db.execute("insert into articles (title, content) values (?, ?)",
-               [request.form.get("title"), request.form.get("content")])
-    db.commit()
-    flash("article was saved", "alert-successful")
-    return redirect(url_for("view_blogs"))
+
+    add_blogs = ArticleForm(request.form)
+    if add_blogs.validate():
+        new_blog = Article(
+            title = add_blogs.title.data,
+            content = add_blogs.content.data)
+        db.session.add(new_blog)
+        db.session.commit()
+        flash("article was saved", "alert-successful")
+        return redirect(url_for("view_blogs"))
+    else:
+        for error in add_blogs.errors:
+            flash("{} is missing".format(error), "alert-fail")
+        return redirect(url_for("add_blogs"))
 
 @flask_app.route("/blogs/new/", methods=["GET"])
 def view_add_blogs():
@@ -77,9 +93,7 @@ def view_admin():
 
 @flask_app.route("/blog/<int:art_id>")
 def view_blog(art_id):
-    db = get_db()
-    cur = db.execute("select * from articles where id=(?)",[art_id])
-    article = cur.fetchone()
+    article = Article.query.filter_by(id=art_id).first()
     if article:
         return render_template("view_blog.html", article=article)
     return render_template('article_not_found.html', art_id=art_id)
@@ -89,13 +103,11 @@ def view_blog_edit(art_id):
     if "logged" not in session:
         flash("you must be logged in", "alert-danger")
         return redirect(url_for("view_login"))
-    db = get_db()
-    cur = db.execute("select * from articles where id=(?)",[art_id])
-    article = cur.fetchone()
+    article = Article.query.filter_by(id=art_id).first()
     if article:
         form = ArticleForm()
-        form.title.data = article["title"]
-        form.content.data= article["content"]
+        form.title.data = article.title
+        form.content.data= article.content
         return render_template("blog_editor.html", form=form, article=article)
     return render_template("article_not_found.html", art_id=art_id)
 
@@ -103,15 +115,14 @@ def view_blog_edit(art_id):
 def view_edit(art_id):
     if "logged" not in session:
         return redirect(url_for("view_login"))
-    db = get_db()
-    cur = db.execute("select * from articles where id=(?)", [art_id])
-    article = cur.fetchone()
+    article = Article.query.filter_by(id=art_id).first()
     if article:
         edit_form = ArticleForm(request.form)
         if edit_form.validate():
-            db.execute("UPDATE articles set title=?, content=? where id=(?)",[edit_form.title.data,
-                                                                            edit_form.content.data, art_id])
-            db.commit()
+            article.title = edit_form.title.data
+            article.content = edit_form.content.data
+            db.session.add(article)
+            db.session.commit()
             flash("article was saved", "alert-successful")
             return redirect(url_for("view_blog", art_id=art_id))
         else:
@@ -129,9 +140,9 @@ def view_login():
 def login_user():
     login_form = LoginForm(request.form)
     if login_form.validate():
-        if login_form.username.data == flask_app.config["USERNAME"] \
-                and login_form.password.data == flask_app.config["PASSWORD"]:
-            session["logged"] = True
+        user = User.query.filter_by(username = login_form.username.data).first()
+        if user and user.check_password(login_form.password.data):
+            session["logged"] = user.username
             flash("login successful", "alert-successful")
             return redirect(url_for("view_admin"))
         else:
@@ -147,28 +158,46 @@ def logout_user():
     session.pop("logged")
     return redirect(url_for("index"))
 
-# UTILS
-def connect_db():
-    rv = sqlite3.connect(flask_app.config["DATABASE"])
-    rv.row_factory = sqlite3.Row
-    return rv
+@flask_app.route("/changepassword/", methods=["GET"])
+def view_change_password():
+    if "logged" not in session:
+        return redirect(url_for("view_login"))
+    form = ChangePasswordForm()
+    return render_template("change_password.html", form=form)
 
-def get_db():
-    if not hasattr(g, "sqlite.db"):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
+@flask_app.route("/changepassword/", methods=["POST"])
+def change_password():
+    if "logged" not in session:
+        return redirect(url_for("view_login"))
+    form = ChangePasswordForm(request.form)
+    if form.validate():
+        user = User.query.filter_by(username = session["logged"]).first()
+        if user and user.check_password(form.old_password.data):
+            user.set_password(form.new_password.data)
+            db.session.add(user)
+            db.session.commit()
+            flash("Password changed successful", "alert-successful")
+            return redirect(url_for("view_admin"))
+        else:
+            flash("Invalid credentials", "alert-fail")
+            return render_template("change_password.html", form=form)
+    else:
+        for error in form.errors:
+            flash("{} is missing".format(error), "alert-fail")
+        return render_template("change_password.html", form=form)
 
-@flask_app.teardown_appcontext
-def close_db(error):
-    if hasattr(g, "sqlite_db"):
-        g.sqlite_db.close()
-
+# CLI COMMAND
 def init_db(app):
     with app.app_context():
-        db = get_db()
-        with open("mdblog/schema.sql", "r") as fp:
-            db.cursor().executescript(fp.read())
-        db.commit()
+        db.create_all()
+        print("Create new DB")
+
+        default_user = User(username="admin")
+        default_user.set_password("admin")
+
+        db.session.add(default_user)
+        db.session.commit()
+        print("default user was created")
 
 # @flask_app.route("/blog/<string:name>/")
 # def blog(name):
