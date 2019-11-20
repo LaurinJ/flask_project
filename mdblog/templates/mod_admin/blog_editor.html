@@ -4,9 +4,9 @@
 
 {% block main %}
         {% if article %}
-            <form action="{{ url_for('view_edit', art_id=article.id) }}" method="post">
+            <form action="{{ url_for('admin.view_edit', art_id=article.id) }}" method="post">
         {% else %}
-            <form action="{{ url_for('add_blogs') }}" method="post">
+            <form action="{{ url_for('admin.add_blogs') }}" method="post">
         {% endif %}
          {{ form.csrf_token }}
         <p>

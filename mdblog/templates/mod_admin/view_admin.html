@@ -4,6 +4,6 @@
 
 {% block main %} 
 {% if "logged" in session %}
-    <a href="{{ url_for('view_change_password') }}">Change password</a>
+    <a href="{{ url_for('admin.view_change_password') }}">Change password</a>
 {% endif %}
 {% endblock %}
