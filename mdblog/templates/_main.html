@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>{% block title %} {% endblock %} </title>
     {% include "_head.html" %}
+    {% block head %}
+
+    {% endblock %}
 </head>
 
 {% with messages = get_flashed_messages(with_categories=True) %}
