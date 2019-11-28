@@ -3,6 +3,7 @@ from wtforms import StringField
 from wtforms import PasswordField
 from wtforms.validators import InputRequired
 from wtforms import TextAreaField
+from wtforms import HiddenField
 
 
 # Forms
@@ -14,6 +15,7 @@ class LoginForm(FlaskForm):
 class ArticleForm(FlaskForm):
     title = StringField("Title", validators=[InputRequired()])
     content = TextAreaField("Content", validators=[InputRequired()])
+    html_render = HiddenField()
 
 class ChangePasswordForm(FlaskForm):
     old_password = PasswordField("Old_password", validators=[InputRequired()])

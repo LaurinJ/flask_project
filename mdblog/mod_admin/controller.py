@@ -27,7 +27,8 @@ def add_blogs():
     if add_blogs.validate():
         new_blog = Article(
             title = add_blogs.title.data,
-            content = add_blogs.content.data)
+            content = add_blogs.content.data,
+            html_render = add_blogs.html_render.data)
         db.session.add(new_blog)
         db.session.commit()
         flash("article was saved", "alert-successful")
@@ -75,6 +76,7 @@ def view_edit(art_id):
         if edit_form.validate():
             article.title = edit_form.title.data
             article.content = edit_form.content.data
+            article.html_render = edit_form.html_render.data
             db.session.add(article)
             db.session.commit()
             flash("article was saved", "alert-successful")

@@ -11,7 +11,7 @@
             {% for article in articles %}
             <li>
                 <a href="{{ url_for('blog.view_blog', art_id=article.id) }}"><h2>{{ article.title }}</h2></a>
-                <p>{{ article.content | truncate(100) }}</p>
+                <p>{{ article.html_render | truncate(100) }}</p>
             </li>
             {% endfor %}
         </ul>
